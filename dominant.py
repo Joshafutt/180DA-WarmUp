@@ -1,46 +1,34 @@
+# importing required libraries
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
-
-
-def find_histogram(clt):
-    """
-    create a histogram with k clusters
-    :param: clt
-    :return:hist
-    """
-    numLabels = np.arange(0, len(np.unique(clt.labels_)) + 1)
-    (hist, _) = np.histogram(clt.labels_, bins=numLabels)
-
-    hist = hist.astype("float")
-    hist /= hist.sum()
-
-    return hist
-def plot_colors2(hist, centroids):
-    bar = np.zeros((50, 300, 3), dtype="uint8")
-    startX = 0
-
-    for (percent, color) in zip(hist, centroids):
-        # plot the relative percentage of each cluster
-        endX = startX + (percent * 300)
-        cv2.rectangle(bar, (int(startX), 0), (int(endX), 50),
-                      color.astype("uint8").tolist(), -1)
-        startX = endX
-
-    # return the bar chart
-    return bar
-
-img = cv2.imread("pic/img7.jpeg")
-img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-img = img.reshape((img.shape[0] * img.shape[1],3)) #represent as row*column,channel number
-clt = KMeans(n_clusters=3) #cluster number
-clt.fit(img)
-
-hist = find_histogram(clt)
-bar = plot_colors2(hist, clt.cluster_centers_)
-
-plt.axis("off")
-plt.imshow(bar)
-plt.show()
+  
+# taking the input from webcam
+vid = cv2.VideoCapture(0)
+  
+# running while loop just to make sure that
+# our program keep running untill we stop it
+while True:
+  
+    # capturing the current frame
+    _, frame = vid.read()
+  
+    # displaying the current frame
+    cv2.imshow("frame", frame) 
+  
+    # setting values for base colors
+    b = frame[:, :, :1]
+    g = frame[:, :, 1:2]
+    r = frame[:, :, 2:]
+  
+    # computing the mean
+    b_mean = np.mean(b)
+    g_mean = np.mean(g)
+    r_mean = np.mean(r)
+  
+    # displaying the most prominent color
+    if (b_mean > g_mean and b_mean > r_mean):
+        print("Blue")
+    if (g_mean > r_mean and g_mean > b_mean):
+        print("Green")
+    else:
+        print("Red")

@@ -163,9 +163,9 @@ kalmanX = 0.0
 kalmanY = 0.0
 
 gyroXangleold = 0.0
-
+oldangle = 0.0
 a = datetime.datetime.now()
-
+Flag = False
 while True:
 
     # Read the accelerometer,gyroscope and magnetometer values
@@ -195,16 +195,24 @@ while True:
     rate_gyr_y = GYRy * G_GAIN
     rate_gyr_z = GYRz * G_GAIN
 
-    if gyroXangle - gyroXangleold > 0:
-        print("Upward")
+   
+     
 
     # Calculate the angles from the gyro.
     gyroXangle += rate_gyr_x*LP
     gyroYangle += rate_gyr_y*LP
     gyroZangle += rate_gyr_z*LP
+    
+    
 
+    dif = abs(gyroXangle)- abs(gyroXangleold)
+        
+        
+    if abs(dif) > 0.3:
+        print("Upward")
+    
     gyroXangleold = gyroXangle
-
+     
    # Convert Accelerometer values to degrees
     AccXangle = (math.atan2(ACCy, ACCz)*RAD_TO_DEG)
     AccYangle = (math.atan2(ACCz, ACCx)+M_PI)*RAD_TO_DEG
@@ -214,11 +222,14 @@ while True:
         AccYangle -= 270.0
     else:
         AccYangle += 90.0
-
+    
+     	
     # Complementary filter used to combine the accelerometer and gyro values.
     CFangleX = AA*(CFangleX+rate_gyr_x*LP) + (1 - AA) * AccXangle
     CFangleY = AA*(CFangleY+rate_gyr_y*LP) + (1 - AA) * AccYangle
-
+    if abs(CFangleX) - abs(oldangle) > 0.3:
+	print("Forward")
+    oldangle = CFangleX 
     # Kalman filter used to combine the accelerometer and gyro values.
     kalmanY = kalmanFilterY(AccYangle, rate_gyr_y, LP)
     kalmanX = kalmanFilterX(AccXangle, rate_gyr_x, LP)
@@ -288,6 +299,7 @@ while True:
     #         kalmanX, kalmanY)
 
     # print(outputString)
-
+   # print(gyroXangle)
+   # print(gyroXangleold)
     # slow program down a bit, makes the output more readable
     time.sleep(0.03)
